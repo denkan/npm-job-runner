@@ -18,9 +18,10 @@ jobs:
           node-version: 16
           registry-url: https://registry.npmjs.org/
       - run: npm install
+        env:
+          NODE_ENV: development # because test & builds needs devDependencies
       - run: npm run test
       - run: npm run publish
         env:
-          NODE_ENV: development # because test & builds needs devDependencies
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
           
