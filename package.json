@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/denkan/npm-typescript-template#readme",
   "devDependencies": {
+    "@types/express": "^4.17.13",
     "@types/jest": "^26.0.15",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
@@ -43,5 +44,8 @@
   },
   "files": [
     "dist/**/*"
-  ]
+  ],
+  "dependencies": {
+    "tiny-typed-emitter": "^2.1.0"
+  }
 }
