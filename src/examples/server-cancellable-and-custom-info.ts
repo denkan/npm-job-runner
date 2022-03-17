@@ -5,7 +5,7 @@ import { JobRunner } from '../job-runner';
 let isCancelled = false;
 
 // will be populated with stuff during job and be sent along with job status
-const myStatusInfo = {};
+const myStatusInfo: any = {};
 
 const my10SecTask = () =>
   new Promise((resolve, reject) => {
@@ -21,7 +21,6 @@ const my10SecTask = () =>
       countSecs++;
       console.log(`Elapsed for ${countSecs} seconds`);
 
-      // @ts-ignore
       myStatusInfo[`sec #${countSecs} fired`] = new Date();
 
       if (countSecs >= 10) {
@@ -35,7 +34,6 @@ const app = express();
 
 const runner = new JobRunner(my10SecTask, { statusInfo: myStatusInfo });
 runner.on('start', () => {
-  // @ts-ignore - remove any statusInfo from previous runs
   Object.keys(myStatusInfo).forEach((k) => delete myStatusInfo[k]);
 });
 runner.on('cancel', () => {

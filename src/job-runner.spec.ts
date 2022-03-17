@@ -1,7 +1,7 @@
 import { IJobRunnerStatus, JobRunner } from './job-runner';
 
 describe('JobRunner', () => {
-  const waitASec = (secToWait: number = 1) => new Promise<void>((resolve) => setTimeout(resolve, secToWait * 1000));
+  const waitASec = (secToWait = 1) => new Promise<void>((resolve) => setTimeout(resolve, secToWait * 1000));
 
   it('should create runnable job with default options', async () => {
     const runner = new JobRunner(() => waitASec());
@@ -30,7 +30,7 @@ describe('JobRunner', () => {
     expect(runner.hasRuntime).toBe(true); // when resetted = true
   });
 
-  it('should return init=false when re-running an already running job ', async () => {
+  it('should return init=false when re-running an already running job', async () => {
     const runner = new JobRunner(() => waitASec());
     const startStatus1 = runner.run();
     await waitASec(0.1);
@@ -40,8 +40,8 @@ describe('JobRunner', () => {
     expect(startStatus1.running).toBe(true);
     expect(startStatus2.init).toBe(false);
     expect(startStatus2.running).toBe(true);
-    expect(startStatus2.elapsedSec).toBeGreaterThan(startStatus1.elapsedSec!);
-    expect(startStatus2.runtimeLeftInSec).toBeLessThan(startStatus1.runtimeLeftInSec!);
+    expect(startStatus2.elapsedSec).toBeGreaterThan(startStatus1.elapsedSec ?? 0);
+    expect(startStatus2.runtimeLeftInSec).toBeLessThan(startStatus1.runtimeLeftInSec ?? 0);
     expect(startStatus2.startedAt).toBe(startStatus1.startedAt);
   });
 
