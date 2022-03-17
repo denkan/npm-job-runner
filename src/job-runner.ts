@@ -17,14 +17,14 @@ export interface IJobRunnerStatus {
   info?: unknown;
 }
 
-export interface IJobRunnerEvents {
-  start: (status: IJobRunnerStatus, job: JobRunner) => void;
-  finish: (status: IJobRunnerStatus, job: JobRunner) => void;
-  cancel: (status: IJobRunnerStatus, job: JobRunner) => void;
-  error: (err: any, status: IJobRunnerStatus, job: JobRunner) => void;
+export interface IJobRunnerEvents<T> {
+  start: (status: IJobRunnerStatus, job: JobRunner<T>) => void;
+  finish: (status: IJobRunnerStatus, job: JobRunner<T>) => void;
+  cancel: (status: IJobRunnerStatus, job: JobRunner<T>) => void;
+  error: (err: any, status: IJobRunnerStatus, job: JobRunner<T>) => void;
 }
 
-export class JobRunner extends TypedEmitter<IJobRunnerEvents> {
+export class JobRunner<T> extends TypedEmitter<IJobRunnerEvents<T>> {
   private startedAt: number | undefined;
   private options: IJobRunnerOptions;
 
@@ -32,7 +32,7 @@ export class JobRunner extends TypedEmitter<IJobRunnerEvents> {
     maxRuntimeInSec: 60,
   };
 
-  constructor(private jobFn: () => unknown | Promise<unknown>, options?: Partial<IJobRunnerOptions>) {
+  constructor(private jobFn: () => T | Promise<T>, options?: Partial<IJobRunnerOptions>) {
     super();
     this.options = Object.assign({}, JobRunner.defaultOptions, options || {});
   }
@@ -51,6 +51,9 @@ export class JobRunner extends TypedEmitter<IJobRunnerEvents> {
     };
   }
 
+  /**
+   * Use to manually run the job
+   */
   run(): IJobRunnerStatus {
     if (this.isRunning) {
       return this.status();
@@ -63,6 +66,7 @@ export class JobRunner extends TypedEmitter<IJobRunnerEvents> {
     this.emit('start', statusWhenStarted, this);
     (async () => {
       try {
+        // support both sync and async functions
         await this.jobFn();
         this.finish();
       } catch (err) {
@@ -80,7 +84,7 @@ export class JobRunner extends TypedEmitter<IJobRunnerEvents> {
    * Use to manually set the job to finished (and trigger `finish` event)
    * Do note! This won't cancel the actually job promise, only resetting JobRunner instance.
    **/
-  finish() {
+  finish(): IJobRunnerStatus {
     const statusWhenFinished = this.status();
     const shouldEmit = !!this.startedAt;
     this.reset();
@@ -90,13 +94,18 @@ export class JobRunner extends TypedEmitter<IJobRunnerEvents> {
     return statusWhenFinished;
   }
 
-  cancel(): void {
+  /**
+   * Use to manually cancel the job (and trigger `cancel` event)
+   * Do note! This won't cancel the actually job promise, only resetting JobRunner instance.
+   */
+  cancel(): IJobRunnerStatus {
     const statusWhenCancelled = this.status();
     const canCancel = !!this.startedAt;
     this.reset();
     if (canCancel) {
       this.emit('cancel', statusWhenCancelled, this);
     }
+    return statusWhenCancelled;
   }
 
   private error(err: unknown): void {
