@@ -1,6 +1,6 @@
 {
   "name": "denk-job-runner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Start and monitor one-at-a-time jobs that can be handled by Express routes",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
